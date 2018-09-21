@@ -18,20 +18,38 @@ const Styles = styled.div`
   }
 `;
 
-class Textarea extends Component {
-  applyHighlights = () => {
-    return this.props.textValue
-      .replace(/\n$/g, '\n\n')
-      .replace(/[A-Z].*?\b/g, '<mark onClick={this.handleMarkedClick}>$&</mark>');
-  };
+const markText = (text, pattern, onClick) => {
+  const splitText = text.split(pattern);
+  if (splitText.length <= 1) {
+    return text;
+  }
 
+  const matches = text.match(pattern);
+  return splitText.reduce(
+    (arr, element, index) =>
+      matches[index]
+        ? [
+            ...arr,
+            element,
+            <mark key={index} onClick={onClick}>
+              {matches[index]}
+            </mark>,
+          ]
+        : [...arr, element],
+    [],
+  );
+};
+
+class ScrapePreview extends Component {
   handleMarkedClick = () => {
     console.log('test');
   };
 
   render() {
-    return <Styles dangerouslySetInnerHTML={{__html: this.applyHighlights()}} />;
+    const cleanText = this.props.textValue.replace(/\n$/g, '\n\n');
+    const marked = markText(cleanText, /[A-Z].*?\b/g, this.handleMarkedClick);
+    return <Styles>{marked}</Styles>;
   }
 }
 
-export default Textarea;
+export default ScrapePreview;
