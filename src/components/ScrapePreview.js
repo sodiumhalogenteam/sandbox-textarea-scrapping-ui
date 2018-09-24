@@ -9,6 +9,7 @@ const Styles = styled.div`
   font-size: 18px;
   padding: 12px 15px;
   line-height: 1.5em;
+  user-select: none;
 
   mark {
     border: 1px solid #444;
@@ -18,36 +19,37 @@ const Styles = styled.div`
   }
 `;
 
-const markText = (text, pattern, onClick) => {
-  const splitText = text.split(pattern);
-  if (splitText.length <= 1) {
-    return text;
-  }
-
-  const matches = text.match(pattern);
-  return splitText.reduce(
-    (arr, element, index) =>
-      matches[index]
-        ? [
-            ...arr,
-            element,
-            <mark key={index} onClick={onClick}>
-              {matches[index]}
-            </mark>,
-          ]
-        : [...arr, element],
-    [],
-  );
-};
-
 class ScrapePreview extends Component {
-  handleMarkedClick = () => {
-    console.log('test');
+  handleMarkedClick = (id, text) => {
+    console.log('clicked', id, text);
+    this.props.handleTextSelected(id, text);
+  };
+
+  markText = (text, pattern, onClick) => {
+    const splitText = text.split(pattern);
+    if (splitText.length <= 1) {
+      return text;
+    }
+
+    const matches = text.match(pattern);
+    return splitText.reduce(
+      (arr, element, index) =>
+        matches[index]
+          ? [
+              ...arr,
+              element,
+              <mark key={index} onClick={() => onClick(index, matches[index])}>
+                {matches[index]}
+              </mark>,
+            ]
+          : [...arr, element],
+      [],
+    );
   };
 
   render() {
     const cleanText = this.props.textValue.replace(/\n$/g, '\n\n');
-    const marked = markText(cleanText, /[A-Z].*?\b/g, this.handleMarkedClick);
+    const marked = this.markText(cleanText, /[A-Z].*?\b/g, this.handleMarkedClick);
     return <Styles>{marked}</Styles>;
   }
 }
