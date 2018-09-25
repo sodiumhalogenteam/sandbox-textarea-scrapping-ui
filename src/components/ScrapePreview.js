@@ -36,27 +36,38 @@ class ScrapePreview extends Component {
     this.props.handleTextSelected(id, text);
   };
 
-  markText = (text, pattern, onClick) => {
+  markText = (text, unqiueWordMatches, pattern, onClick) => {
     const splitText = text.split(pattern);
     if (splitText.length <= 1) {
       return text;
     }
-
     const matches = text.match(pattern);
-    return splitText.reduce((arr, element, index) => {
-      const isSelected = this.props.notedText.filter(obj => {
-        return obj.selected;
-      }).length;
 
-      console.log('selected', isSelected);
+    // put full text back together
+    const fullTextSplit = splitText.reduce((arr, element, index) => {
+      if (!matches[index]) return [...arr, element];
+      return [...arr, element, matches[index]];
+    }, []);
+
+    // add <Mark/> to text
+    return fullTextSplit.map((element, index) => {
+      let isSelected = false;
+      let matchId = null;
+      const isAMatch = unqiueWordMatches.some(item => {
+        if (element === item.text) {
+          isSelected = item.selected;
+          matchId = item.id;
+          return true;
+        }
+        return false;
+      });
 
       // no match
-      if (!matches[index]) return [...arr, element];
+      if (!isAMatch) return element;
+      // match found
       return [
-        ...arr,
-        element,
-        <Mark key={index} selected={isSelected} onClick={() => onClick(index, matches[index], true)}>
-          <mark>{matches[index]}</mark>
+        <Mark key={index} selected={isSelected} onClick={() => onClick(matchId, isSelected)}>
+          <mark>{element}</mark>
         </Mark>,
       ];
     }, []);
@@ -64,7 +75,7 @@ class ScrapePreview extends Component {
 
   render() {
     const cleanText = this.props.textValue.replace(/\n$/g, '\n\n');
-    const marked = this.markText(cleanText, /[A-Z].*?\b/g, this.handleMarkedClick);
+    const marked = this.markText(cleanText, this.props.notedText, this.props.regex, this.handleMarkedClick);
     return (
       <Styles>
         <div>{marked}</div>

@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import styled from 'styled-components';
 import Textarea from './components/Textarea';
 import ScrapePreview from './components/ScrapePreview';
+import Search from './components/Search';
 
 const Styles = styled.div``;
 const Nav = styled.div``;
@@ -13,14 +14,19 @@ const Views = styled.div`
   & > div {
     margin: 30px;
   }
-  & > div > div {
+  .side-by-side {
     display: flex;
   }
   .list {
+    line-height: 1.7em;
     border: 1px solid #ccc;
-    width: 20%;
+    width: 40%;
+    max-width: 90vw;
+    padding: 20px 40px;
+    margin: 0 30px;
     li {
-      &.selected {
+      width: 50%;
+      &.selected > span {
         background: green;
         color: white;
         padding: 4px 5px;
@@ -29,9 +35,14 @@ const Views = styled.div`
   }
 `;
 
+RegExp.escape = function(string) {
+  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
+
 class App extends Component {
   state = {
     isViewInput: true,
+    regex: /[A-Z].*?\b/g,
     text:
       'An attack on the information systems of Hancock Health was initiated by an as-yet unidentified criminal group.  The attack used ransomware, a kind of computer malware that locks up computers until a ransom is paid, usually in the form of Bitcoin.  Through the effective teamwork of the Hancock technology team, an expert technology consulting group, and our clinical team, Hancock was able to recover the use of its computers, and at this time, there is no evidence that any patient information was adversely affected.   Hancock is continuing to work with national law enforcement to learn more about the incident.  We plan to provide additional information to our community regarding this act soon.',
     notedText: [
@@ -54,31 +65,21 @@ class App extends Component {
     });
   };
 
-  handleTextSelected = (id, text, add = true) => {
-    console.log('state:', this.state.notedText, ' add:', add, id, text);
-    if (add) {
-      // add to notedText
-      const notedText = this.state.notedText;
-      notedText.push({
-        id: id,
-        text: text,
-        selected: true,
-      });
-      console.log('add', notedText, text);
-      this.setState({notedText});
-    } else {
-      const notedText = this.state.notedText.map(item => {
-        // console.log(item, item.text, text, item.text === text, {...item, selected: false});
-        if (item.text === text) return {...item, selected: false};
-        return item;
-      });
-      console.log('after remove', notedText, text);
-      // remove from notedText
-      this.setState({notedText});
-    }
+  handleSearchChange = regex => {
+    this.setState({
+      regex,
+    });
   };
 
-  collectNotedWords = (text, pattern) => {
+  handleTextSelected = (id, isSelected) => {
+    const notedText = this.state.notedText.map(item => {
+      if (item.id === id) return {...item, selected: !isSelected};
+      return item;
+    });
+    this.setState({notedText});
+  };
+
+  getUniqueListOfMatchingWords = (text, pattern) => {
     const splitText = text.split(pattern);
     if (splitText.length <= 1) {
       return text;
@@ -90,11 +91,8 @@ class App extends Component {
   };
 
   toggleView = () => {
-    this.setState({isViewInput: !this.state.isViewInput});
-
-    const notedText = this.collectNotedWords(this.state.text, /[A-Z].*?\b/g);
-    console.log(this.state.isViewInput, notedText);
-    this.setState({notedText});
+    const notedText = this.getUniqueListOfMatchingWords(this.state.text, this.state.regex);
+    this.setState({isViewInput: !this.state.isViewInput, notedText});
   };
 
   render() {
@@ -108,24 +106,32 @@ class App extends Component {
             <Textarea textValue={this.state.text} handleTextChange={this.handleTextChange} />
           ) : (
             <div>
-              <ScrapePreview
-                textValue={this.state.text}
-                notedText={this.state.notedText}
-                handleTextSelected={this.handleTextSelected}
-              />
-              <div className="list">
-                <ul>
-                  {this.state.notedText.map((el, index) => {
-                    if (el.selected) {
+              <Search handleSearchChange={this.handleSearchChange} textValue={this.state.regex} />
+              <div className="side-by-side">
+                <ScrapePreview
+                  textValue={this.state.text}
+                  notedText={this.state.notedText}
+                  regex={this.state.regex}
+                  handleTextSelected={this.handleTextSelected}
+                />
+                <div className="list">
+                  <ul>
+                    {this.state.notedText.map((el, index) => {
+                      if (el.selected) {
+                        return (
+                          <li className="selected" key={index}>
+                            <span>{el.text}</span>
+                          </li>
+                        );
+                      }
                       return (
-                        <li className="selected" key={index}>
-                          {el.text}
+                        <li key={index}>
+                          <span>{el.text}</span>
                         </li>
                       );
-                    }
-                    return <li key={index}>{el.text}</li>;
-                  })}
-                </ul>
+                    })}
+                  </ul>
+                </div>
               </div>
             </div>
           )}
