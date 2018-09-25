@@ -10,6 +10,7 @@ const Styles = styled.div`
   padding: 12px 15px;
   line-height: 1.5em;
   user-select: none;
+  overflow: scroll;
 `;
 
 const Mark = styled.span`

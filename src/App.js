@@ -49,10 +49,6 @@ const Views = styled.div`
   }
 `;
 
-RegExp.escape = function(string) {
-  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-};
-
 class App extends Component {
   state = {
     isViewInput: true,
@@ -113,9 +109,6 @@ class App extends Component {
     return (
       <Styles>
         <Views>
-          <Nav>
-            <button onClick={this.toggleView}>{this.state.isViewInput ? 'Next' : 'Back'}</button>
-          </Nav>
           {this.state.isViewInput ? (
             <Textarea textValue={this.state.text} handleTextChange={this.handleTextChange} />
           ) : (
@@ -152,6 +145,9 @@ class App extends Component {
               </div>
             </div>
           )}
+          <Nav>
+            <button onClick={this.toggleView}>{this.state.isViewInput ? 'Next >>' : '<< Back'}</button>
+          </Nav>
         </Views>
       </Styles>
     );
