@@ -7,12 +7,18 @@ import Search from './components/Search';
 const Styles = styled.div``;
 const Nav = styled.div``;
 const Views = styled.div`
-  display: flex;
+  /* display: flex; */
   width: 90vw;
   max-width: 90vw;
   padding: 4%;
   & > div {
     margin: 30px;
+  }
+  button {
+    background: #b5b5b5;
+    color: white;
+    padding: 13px 24px;
+    font-size: 1.2em;
   }
   .side-by-side {
     display: flex;
@@ -26,10 +32,18 @@ const Views = styled.div`
     margin: 0 30px;
     li {
       width: 50%;
+      border: 1px solid transparent;
+      span {
+        padding: 4px 5px;
+      }
+      cursor: pointer;
+      &:hover span {
+        border: 1px solid #444;
+      }
       &.selected > span {
+        border: 1px solid green;
         background: green;
         color: white;
-        padding: 4px 5px;
       }
     }
   }
@@ -98,10 +112,10 @@ class App extends Component {
   render() {
     return (
       <Styles>
-        <Nav>
-          <button onClick={this.toggleView}>{this.state.isViewInput ? 'Next' : 'Back'}</button>
-        </Nav>
         <Views>
+          <Nav>
+            <button onClick={this.toggleView}>{this.state.isViewInput ? 'Next' : 'Back'}</button>
+          </Nav>
           {this.state.isViewInput ? (
             <Textarea textValue={this.state.text} handleTextChange={this.handleTextChange} />
           ) : (
@@ -119,13 +133,16 @@ class App extends Component {
                     {this.state.notedText.map((el, index) => {
                       if (el.selected) {
                         return (
-                          <li className="selected" key={index}>
+                          <li
+                            className="selected"
+                            key={index}
+                            onClick={e => this.handleTextSelected(el.id, el.selected)}>
                             <span>{el.text}</span>
                           </li>
                         );
                       }
                       return (
-                        <li key={index}>
+                        <li key={index} onClick={e => this.handleTextSelected(el.id, el.selected)}>
                           <span>{el.text}</span>
                         </li>
                       );
