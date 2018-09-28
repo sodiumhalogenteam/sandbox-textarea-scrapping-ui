@@ -38,11 +38,11 @@ class ScrapePreview extends Component {
   };
 
   markText = (text, unqiueWordMatches, pattern, onClick) => {
-    const splitText = text.split(pattern);
+    const splitText = text.split(new RegExp(pattern, 'g'));
     if (splitText.length <= 1) {
       return text;
     }
-    const matches = text.match(pattern);
+    const matches = text.match(new RegExp(pattern, 'g'));
 
     // put full text back together
     const fullTextSplit = splitText.reduce((arr, element, index) => {

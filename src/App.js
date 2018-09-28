@@ -52,7 +52,7 @@ const Views = styled.div`
 class App extends Component {
   state = {
     isViewInput: true,
-    regex: /[A-Z].*?\b/g,
+    regex: '[A-Z].*?\\b',
     text:
       'An attack on the information systems of Hancock Health was initiated by an as-yet unidentified criminal group.  The attack used ransomware, a kind of computer malware that locks up computers until a ransom is paid, usually in the form of Bitcoin.  Through the effective teamwork of the Hancock technology team, an expert technology consulting group, and our clinical team, Hancock was able to recover the use of its computers, and at this time, there is no evidence that any patient information was adversely affected.   Hancock is continuing to work with national law enforcement to learn more about the incident.  We plan to provide additional information to our community regarding this act soon.',
     notedText: [
@@ -90,12 +90,12 @@ class App extends Component {
   };
 
   getUniqueListOfMatchingWords = (text, pattern) => {
-    const splitText = text.split(pattern);
+    const splitText = text.split(new RegExp(pattern, 'g'));
     if (splitText.length <= 1) {
       return text;
     }
 
-    const matches = text.match(pattern);
+    const matches = text.match(new RegExp(pattern, 'g'));
     const uniqueMatches = [...new Set(matches)]; // ES6 remove duplicates from array
     return uniqueMatches.map((match, index) => ({id: index, text: match, selected: false}));
   };
